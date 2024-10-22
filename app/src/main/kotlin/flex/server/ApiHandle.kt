@@ -1,7 +1,8 @@
 package flex.server
 
 import io.ktor.server.routing.*
+import io.ktor.server.response.*
 
-fun handleApi(call: RoutingCall) {
-    
+suspend fun handleApi(call: RoutingCall) {
+    call.respondText("Hello, this is a flex server!")
 }

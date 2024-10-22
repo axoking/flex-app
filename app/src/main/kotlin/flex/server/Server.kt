@@ -17,6 +17,6 @@ class Server {
     
     fun start() {
         println("Server running")
-        ktorServer.start(wait = true)
+        ktorServer.start(wait = false)
     }
 }
