@@ -15,7 +15,16 @@ class Client {
 
     suspend fun greet() {
         println("getting $url")
-        val resp = con.get(url)
+        val resp = requestApi(
+            "action" to "hello",
+            "version" to VERSION,
+        )
         println(resp.body() as String)
+    }
+
+    suspend fun request(vararg args: Pair) {
+        con.get(url) {
+            headers = ApiArgs.from(args).makeHeaders()
+        }
     }
 }
