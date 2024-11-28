@@ -1,6 +1,0 @@
-run = "gradle run"
-entrypoint = "README.md"
-modules = ["java-graalvm22.3"]
-
-[nix]
-channel = "stable-24_05"
