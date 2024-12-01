@@ -9,12 +9,12 @@ import flex.server.handleApi
 class Server {
 	val ktorServer = embeddedServer(Netty, port = 56789) {
 		routing {
-			get("/api") {
+			post("/api") {
 				handleApi(call)
 			}
 		}
 	}
-	
+
 	fun start() {
 		println("Server running")
 		ktorServer.start(wait = false)
