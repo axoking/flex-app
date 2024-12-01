@@ -23,7 +23,7 @@ class ApiHandle {
 				call.respondError("Invalid version")
 			}
 			else {
-				call.respondArgs("version" to VERSION, "burger" to "pommes")
+				call.respondArgs("version" to VERSION)
 			}
 		}
 

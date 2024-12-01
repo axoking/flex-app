@@ -24,7 +24,8 @@ class Client {
 			"version" to VERSION,
 		)
 		val args = resp.readArgs()
-		println(args["burger"])
+		val version = args["version"]
+		println("Server uses version $version")
 	}
 
 	suspend fun requestApi(vararg args: Pair<String, String>) = con.post(url) {
