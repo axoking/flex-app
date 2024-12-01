@@ -8,6 +8,8 @@ import io.ktor.client.statement.*
 import flex.api.*
 import flex.values.*
 
+suspend fun HttpResponse.readArgs() = decodeArgs(this.bodyAsText())
+
 class Client {
 	val con = HttpClient(CIO)
 	val url: String
@@ -21,7 +23,8 @@ class Client {
 			"action" to "hello",
 			"version" to VERSION,
 		)
-		println(resp.bodyAsText())
+		val args = resp.readArgs()
+		println(args["burger"])
 	}
 
 	suspend fun requestApi(vararg args: Pair<String, String>) = con.post(url) {
