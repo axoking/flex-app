@@ -10,13 +10,10 @@ import flex.values.*
 
 suspend fun HttpResponse.readArgs() = decodeArgs(this.bodyAsText())
 
-class Client {
+// Client which is bound to a specific server
+class Client(host: String) {
 	val con = HttpClient(CIO)
-	val url: String
-
-	constructor(host: String) {
-		url = "http://$host:56789/api"
-	}
+	val url: String = "http://$host:56789/api"
 
 	suspend fun greet() {
 		val resp = requestApi(

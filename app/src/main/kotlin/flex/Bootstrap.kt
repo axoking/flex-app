@@ -1,4 +1,4 @@
-package flex;
+package flex
 
 import flex.server.Server
 import flex.client.Client
