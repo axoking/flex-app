@@ -3,12 +3,25 @@
  */
 package org.example
 
+import flex.client.Client
+import flex.server.Server
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 class AppTest {
-    @Test fun appHasAGreeting() {
-        val classUnderTest = App()
-        assertNotNull(classUnderTest.greeting, "app should have a greeting")
+    @Test
+    fun testGreeting(): Unit = runBlocking {
+        launch {
+            Server().start()
+        }
+
+        launch {
+            delay(500L)
+            val con = Client("localhost")
+            con.greet()
+        }
     }
 }
