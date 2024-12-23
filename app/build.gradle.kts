@@ -38,6 +38,7 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
+    implementation("ch.qos.logback:logback-classic:1.5.15")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
