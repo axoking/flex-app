@@ -6,10 +6,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.netty.*
 import flex.api.*
-import kotlin.random.Random
+import io.ktor.client.engine.*
+import java.io.File
 
 const val MAX_PUSH_FILES = 5
-const val KEY_BYTES = 32
 
 class Server {
 	var isPushing = false
@@ -28,6 +28,10 @@ class Server {
 
 			get("/") {
 				handleWebview(call)
+			}
+
+			get("/download") {
+				handleDownload(call)
 			}
 		}
 	}
@@ -55,9 +59,17 @@ class Server {
 		)))
 	}
 
-	fun generatePushFilesHtml(): String  = pushFiles.joinToString("\n") {
-		val escaped = escapeHtml(it)
-		"<li>$escaped</li>"
+	suspend fun handleDownload(call: RoutingCall) {
+		val index = call.queryParameters["i"]?.toInt()
+		if (index == null || index >= pushFiles.size || index < 0) call.respond(400)
+		val file = File(pushFiles[index!!])
+		call.response.header("Content-Disposition", "attachment")
+		call.respondFile(file)
+	}
+
+	fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {
+		val escaped = escapeHtml(it.value)
+		"<li><a href=\"download?i=${it.index}\">$escaped</a></li>"
 	}
 
 	suspend fun handleApiRequest(call: RoutingCall) {
