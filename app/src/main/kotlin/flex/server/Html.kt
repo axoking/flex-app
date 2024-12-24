@@ -16,3 +16,16 @@ fun renderHtml(filename: String, data: Map<String, String>): String = buildStrin
 		append(plain)
 	}
 }
+
+fun escapeHtml(html: String): String = buildString {
+	for (char in html.chars()) {
+		append(when (char) {
+			'>'.code -> "&gt;"
+			'<'.code -> "&lt;"
+			'&'.code -> "&amp;"
+			'"'.code -> "&quot;"
+			'\''.code -> "&apos;"
+			else -> char.toChar()
+		})
+	}
+}
