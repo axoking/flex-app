@@ -7,7 +7,9 @@ import io.ktor.server.response.*
 import io.ktor.server.netty.*
 import flex.api.*
 import io.ktor.client.engine.*
+import mu.KotlinLogging
 import java.io.File
+import kotlin.io.path.Path
 
 const val MAX_PUSH_FILES = 5
 
@@ -18,14 +20,6 @@ class Server {
 
 	val ktorServer = embeddedServer(Netty, port = 56789) {
 		routing {
-			post("/api") {
-				//handleApiRequest(call)
-				call.respondText("Uninmplemented!")
-			}
-			get("/api") {
-				call.respondText("Uninmplemented!")
-			}
-
 			get("/") {
 				handleWebview(call)
 			}
@@ -37,7 +31,7 @@ class Server {
 	}
 
 	fun start(wait: Boolean) {
-		println("Server running")
+		KotlinLogging.logger{}.info("HTTP server running")
 		ktorServer.start(wait = wait)
 	}
 
@@ -51,7 +45,6 @@ class Server {
 
 	suspend fun handleWebview(call: RoutingCall) {
 		call.response.header("Content-Type", "text/html")
-		val text = "Here's some text: 1 < 3, \"hello world!\" & happy new year >>>>>"
 		call.respondText(renderHtml("webview", mapOf(
 			"pushHidden" to if (isPushing) "" else "hidden",
 			"pullHidden" to if (isPulling) "" else "hidden",
@@ -62,23 +55,13 @@ class Server {
 	suspend fun handleDownload(call: RoutingCall) {
 		val index = call.queryParameters["i"]?.toInt()
 		if (index == null || index >= pushFiles.size || index < 0) call.respond(400)
-		val file = File(pushFiles[index!!])
-		call.response.header("Content-Disposition", "attachment")
+		val file= File(pushFiles[index!!])
+		call.response.header("Content-Disposition", "attachment; filename=${file.name}")
 		call.respondFile(file)
 	}
 
 	fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {
-		val escaped = escapeHtml(it.value)
+		val escaped = escapeHtml(File(it.value).name)
 		"<li><a href=\"download?i=${it.index}\">$escaped</a></li>"
-	}
-
-	suspend fun handleApiRequest(call: RoutingCall) {
-		val args = decodeArgs(call.receiveText())
-
-		val handler = when (args["action"]) {
-			"hello" -> ApiHandle::greet
-			else -> ApiHandle::unknownAction
-		}
-		handler(call, args)
 	}
 }

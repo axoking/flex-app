@@ -39,6 +39,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-cio")
     implementation("ch.qos.logback:logback-classic:1.5.15")
+    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
