@@ -1,24 +1,20 @@
 package flex.server
 
+import flex.Log
 import io.ktor.server.engine.*
 import io.ktor.server.routing.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.netty.*
-import flex.api.*
-import io.ktor.client.engine.*
-import mu.KotlinLogging
 import java.io.File
-import kotlin.io.path.Path
 
 const val MAX_PUSH_FILES = 5
 
 class Server {
-	var isPushing = false
-	var isPulling = false
-	var pushFiles: List<String> = listOf()
+	private var isPushing = false
+	private var isPulling = false
+	private var pushFiles: List<String> = listOf()
 
-	val ktorServer = embeddedServer(Netty, port = 56789) {
+	private val ktorServer = embeddedServer(Netty, port = 56789) {
 		routing {
 			get("/") {
 				handleWebview(call)
@@ -31,7 +27,7 @@ class Server {
 	}
 
 	fun start(wait: Boolean) {
-		KotlinLogging.logger{}.info("HTTP server running")
+		Log.info("HTTP server running")
 		ktorServer.start(wait = wait)
 	}
 
@@ -43,7 +39,7 @@ class Server {
 		pushFiles = files
 	}
 
-	suspend fun handleWebview(call: RoutingCall) {
+	private suspend fun handleWebview(call: RoutingCall) {
 		call.response.header("Content-Type", "text/html")
 		call.respondText(renderHtml("webview", mapOf(
 			"pushHidden" to if (isPushing) "" else "hidden",
@@ -52,7 +48,7 @@ class Server {
 		)))
 	}
 
-	suspend fun handleDownload(call: RoutingCall) {
+	private suspend fun handleDownload(call: RoutingCall) {
 		val index = call.queryParameters["i"]?.toInt()
 		if (index == null || index >= pushFiles.size || index < 0) call.respond(400)
 		val file= File(pushFiles[index!!])
@@ -60,7 +56,7 @@ class Server {
 		call.respondFile(file)
 	}
 
-	fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {
+	private fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {
 		val escaped = escapeHtml(File(it.value).name)
 		"<li><a href=\"download?i=${it.index}\">$escaped</a></li>"
 	}
