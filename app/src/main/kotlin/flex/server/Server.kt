@@ -5,6 +5,7 @@ import io.ktor.server.engine.*
 import io.ktor.server.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.netty.*
+import io.ktor.server.request.*
 import java.io.File
 
 const val MAX_PUSH_FILES = 5
@@ -23,6 +24,10 @@ class Server {
 			get("/download") {
 				handleDownload(call)
 			}
+
+			post("/pullrq") {
+				handlePullRequest(call)
+			}
 		}
 	}
 
@@ -37,6 +42,10 @@ class Server {
 		}
 		isPushing = true
 		pushFiles = files
+	}
+
+	fun enablePull() {
+		isPulling = true;
 	}
 
 	private suspend fun handleWebview(call: RoutingCall) {
@@ -54,6 +63,14 @@ class Server {
 		val file= File(pushFiles[index!!])
 		call.response.header("Content-Disposition", "attachment; filename=${file.name}")
 		call.respondFile(file)
+	}
+
+	private suspend fun handlePullRequest(call: RoutingCall) {
+		val args = call.receiveParameters()
+		val size = args["size"]?.toInt()
+		val name = args["name"]
+
+		Log.debug("File $name of size $size requested")
 	}
 
 	private fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {

@@ -1,0 +1,5 @@
+FLEX SERVER
+
+GET /			-> HTML webview
+GET /download	-> Return file requested in the URL args
+POST /pullrq	-> Request to send a file to the server

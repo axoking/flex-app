@@ -1,3 +1,12 @@
+/*
+
+CURRENTLY UNUSED
+meant for APIs to let flex-apps directly work with each other
+instead of using the web interface
+
+ */
+
+
 package flex.server
 
 import io.ktor.server.routing.*
