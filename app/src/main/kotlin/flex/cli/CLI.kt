@@ -2,6 +2,7 @@ package flex.cli
 
 import flex.server.Server
 import flex.values.VERSION
+import java.nio.file.Paths
 
 const val helpMessage = """
 help message goes here
@@ -22,7 +23,6 @@ class CLI {
 	private val serverInstance = Server()
 	private var pushEnabled = false
 	private var pullEnabled = false
-	private val pushFiles: List<String> = listOf()
 
 	private fun prompt(): Boolean {
 		// Waits for a new command and executes it. Returns false on exit.
@@ -44,10 +44,12 @@ class CLI {
 				"off" -> false
 				else -> { println("syntax: push <on | off>"); return true }
 			}
-			"list" -> println(pushFiles.withIndex().joinToString {
+			"list" -> println(serverInstance.pushFiles.withIndex().joinToString {
 				"${it.index}: ${it.value}"
 			})
+			"pwd" -> println(Paths.get("").toAbsolutePath())
 			"add" -> addPushFile(args.getOrNull(0))
+			"run" -> serverInstance.start(true)
 			else -> println("unknown command")
 		}
 

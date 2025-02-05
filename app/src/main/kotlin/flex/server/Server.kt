@@ -16,7 +16,8 @@ const val MAX_PUSH_FILES = 5
 class Server {
 	var isPushing = false
 	var isPulling = false
-	private var pushFiles: MutableList<String> = mutableListOf()
+	var pushFiles: MutableList<String> = mutableListOf()
+		private set
 
 	private val ktorServer = embeddedServer(Netty, port = 56789) {
 		routing {
