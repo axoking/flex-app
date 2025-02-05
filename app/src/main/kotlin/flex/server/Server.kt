@@ -7,13 +7,16 @@ import io.ktor.server.response.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.exists
+import kotlin.io.path.isRegularFile
 
 const val MAX_PUSH_FILES = 5
 
 class Server {
-	private var isPushing = false
-	private var isPulling = false
-	private var pushFiles: List<String> = listOf()
+	var isPushing = false
+	var isPulling = false
+	private var pushFiles: MutableList<String> = mutableListOf()
 
 	private val ktorServer = embeddedServer(Netty, port = 56789) {
 		routing {
@@ -36,16 +39,16 @@ class Server {
 		ktorServer.start(wait = wait)
 	}
 
-	fun enablePush(files: List<String>) {
-		if (files.size > MAX_PUSH_FILES) {
-			throw IllegalArgumentException("A maxmium of $MAX_PUSH_FILES is allowed to push, ${files.size} given")
+	fun addPushFile(path: String) {
+		if (pushFiles.size + 1 > MAX_PUSH_FILES) {
+			throw IllegalStateException("A maxmium of $MAX_PUSH_FILES is allowed to push")
 		}
-		isPushing = true
-		pushFiles = files
-	}
-
-	fun enablePull() {
-		isPulling = true;
+		else if (!Path(path).isRegularFile()) {
+			throw IllegalArgumentException("Invalid path given")
+		}
+		else {
+			pushFiles.add(path)
+		}
 	}
 
 	private suspend fun handleWebview(call: RoutingCall) {
@@ -60,7 +63,7 @@ class Server {
 	private suspend fun handleDownload(call: RoutingCall) {
 		val index = call.queryParameters["i"]?.toInt()
 		if (index == null || index >= pushFiles.size || index < 0) call.respond(400)
-		val file= File(pushFiles[index!!])
+		val file = File(pushFiles[index!!])
 		call.response.header("Content-Disposition", "attachment; filename=${file.name}")
 		call.respondFile(file)
 	}
