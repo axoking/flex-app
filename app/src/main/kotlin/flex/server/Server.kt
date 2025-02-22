@@ -12,12 +12,16 @@ import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.isRegularFile
 
-const val MAX_PUSH_FILES = 5
+const val MAX_PUSH_FILES = 10
+const val MAX_PULL_FILES = 16
+const val MAX_PULL_BYTES = 32_000_000_000 // 32 GB
 
-class Server {
+class Server(val doLogging: Boolean) {
 	var isPushing = false
 	var isPulling = false
 	var pushFiles: MutableList<String> = mutableListOf()
+		private set
+	var pullQueue: MutableList<PullRequest> = mutableListOf()
 		private set
 
 	private val ktorServer = embeddedServer(Netty, port = 56789) {
@@ -39,8 +43,13 @@ class Server {
 	}
 
 	fun start(wait: Boolean) {
-		Log.info("HTTP server running")
+		if (doLogging) Log.info("HTTP server running")
 		ktorServer.start(wait = wait)
+	}
+
+	fun stop() {
+		if (doLogging) Log.info("Terminating server")
+		ktorServer.stop()
 	}
 
 	fun addPushFile(path: String) {
@@ -77,7 +86,7 @@ class Server {
 		val size = args["size"]?.toInt()
 		val name = args["name"]
 
-		Log.debug("File $name of size $size requested")
+		if (doLogging) Log.debug("File $name of size $size requested")
 	}
 
 	private fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {

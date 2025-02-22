@@ -16,11 +16,13 @@ class CLI {
 	add [path]: add a file to push
 	list: list files to push
 	remove [0, 1, 2, 3...]: remove a file to push
-	run: run the server
+	start: run the server
+	stop: stop it
+	update: check if there are pull requests
 	exit: exit bruh
 	 */
 
-	private val serverInstance = Server()
+	private val serverInstance = Server(false)
 	private var pushEnabled = false
 	private var pullEnabled = false
 
@@ -49,7 +51,9 @@ class CLI {
 			})
 			"pwd" -> println(Paths.get("").toAbsolutePath())
 			"add" -> addPushFile(args.getOrNull(0))
-			"run" -> serverInstance.start(true)
+			"start" -> serverInstance.start(false)
+			"stop" -> serverInstance.stop()
+			"update" -> checkPullRequests()
 			else -> println("unknown command")
 		}
 
@@ -71,6 +75,16 @@ class CLI {
 		}
 		catch (e: Exception) {
 			println("error: $e")
+		}
+	}
+
+	private fun checkPullRequests() {
+		if (!serverInstance.isPulling) {
+			println("Pull is not enabled")
+			return
+		}
+		for (file in serverInstance.pullQueue) {
+			println(file)
 		}
 	}
 }

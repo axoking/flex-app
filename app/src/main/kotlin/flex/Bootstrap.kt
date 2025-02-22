@@ -11,10 +11,12 @@ fun main() {
 	val dir = Paths.get("").toAbsolutePath()
 	Log.debug("The working directory is $dir")
 
+	/*
 	val server = Server()
 	server.isPushing = true;
 	server.addPushFile("src/main/resources/test_files/hello.txt")
+	server.isPulling = true;
 	server.start(true)
-
-	//CLI().run()
+	 */
+	CLI().run()
 }
