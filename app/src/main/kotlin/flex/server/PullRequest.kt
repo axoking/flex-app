@@ -1,5 +1,9 @@
 package flex.server
 
-class PullRequest {
-	// filename, size, type, uploaded by, and so on
-}
+class PullRequest (
+	val name: String,
+	val size: ULong,
+	val	ip: String
+)
+
+// most useful file ever created

@@ -1,22 +1,23 @@
 package flex.server
 
 import flex.Log
+import io.ktor.http.*
 import io.ktor.server.engine.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import java.io.File
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.isRegularFile
 
 const val MAX_PUSH_FILES = 10
 const val MAX_PULL_FILES = 16
-const val MAX_PULL_BYTES = 32_000_000_000 // 32 GB
+const val MAX_PULL_BYTES = 32_000_000_000u // 32 GB
 
-class Server(val doLogging: Boolean) {
+class Server(private val doLogging: Boolean) {
 	var isPushing = false
 	var isPulling = false
 	var pushFiles: MutableList<String> = mutableListOf()
@@ -64,6 +65,10 @@ class Server(val doLogging: Boolean) {
 		}
 	}
 
+	private fun addPullQueueEntry(rq: PullRequest) {
+		pullQueue.add(rq)
+	}
+
 	private suspend fun handleWebview(call: RoutingCall) {
 		call.response.header("Content-Type", "text/html")
 		call.respondText(renderHtml("webview", mapOf(
@@ -83,10 +88,13 @@ class Server(val doLogging: Boolean) {
 
 	private suspend fun handlePullRequest(call: RoutingCall) {
 		val args = call.receiveParameters()
-		val size = args["size"]?.toInt()
+		val size = args["size"]?.toULong()
 		val name = args["name"]
-
-		if (doLogging) Log.debug("File $name of size $size requested")
+		if (size == null || name == null || size > MAX_PULL_BYTES) {
+			call.response.status(HttpStatusCode.BadRequest)
+			return
+		}
+		addPullQueueEntry(PullRequest(name, size, call.request.origin.remoteAddress))
 	}
 
 	private fun generatePushFilesHtml(): String  = pushFiles.withIndex().joinToString("\n") {
